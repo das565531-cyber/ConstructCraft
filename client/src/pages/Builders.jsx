@@ -12,6 +12,9 @@ function Builders() {
   const [savedBuilders, setSavedBuilders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const fallbackImage =
+    "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=900&q=80";
+
   useEffect(() => {
     loadBuilders();
     loadSavedBuilders();
@@ -20,7 +23,24 @@ function Builders() {
   const loadBuilders = async () => {
     try {
       const data = await getBuilders();
-      setBuilders(data || []);
+
+      const fixedBuilders = (data || []).map((builder, index) => ({
+        ...builder,
+        name: builder.name || `Builder ${index + 1}`,
+        owner: builder.owner || "Not Available",
+        rating: builder.rating || 4.5,
+        experience: builder.experience || 5,
+        location: builder.location || "Kolkata",
+        projects: builder.projects || 0,
+        phone: builder.phone || "Not Available",
+        image:
+          builder.image && builder.image.trim() !== ""
+            ? builder.image
+            : fallbackImage,
+        specialty: builder.specialty || "Construction Projects",
+      }));
+
+      setBuilders(fixedBuilders);
     } catch (error) {
       console.log(error);
       alert("Failed to load builders");
@@ -55,12 +75,15 @@ function Builders() {
     }
   };
 
-  const filteredBuilders = builders.filter(
-    (builder) =>
-      builder.location?.toLowerCase().includes(search.toLowerCase()) ||
-      builder.name?.toLowerCase().includes(search.toLowerCase()) ||
-      builder.specialty?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredBuilders = builders.filter((builder) => {
+    const text = search.toLowerCase();
+
+    return (
+      builder.location?.toLowerCase().includes(text) ||
+      builder.name?.toLowerCase().includes(text) ||
+      builder.specialty?.toLowerCase().includes(text)
+    );
+  });
 
   const avgRating =
     builders.length > 0
@@ -88,8 +111,8 @@ function Builders() {
             </h1>
 
             <p className="text-gray-300 mt-6 text-lg leading-8">
-              Builders are now loaded dynamically from Supabase. Save your
-              favorite builders securely and view them from your dashboard.
+              Builders are loaded from Supabase. Save your favorite builders
+              securely and view them from your dashboard.
             </p>
 
             <div className="grid sm:grid-cols-3 gap-4 mt-8">
@@ -138,27 +161,21 @@ function Builders() {
                 <h3 className="text-2xl font-bold text-orange-400">
                   {filteredBuilders.length}
                 </h3>
-                <p className="text-xs text-gray-300">
-                  Results
-                </p>
+                <p className="text-xs text-gray-300">Results</p>
               </div>
 
               <div className="bg-black/30 border border-white/10 rounded-2xl p-4 text-center">
                 <h3 className="text-2xl font-bold text-orange-400">
                   Live
                 </h3>
-                <p className="text-xs text-gray-300">
-                  Supabase
-                </p>
+                <p className="text-xs text-gray-300">Supabase</p>
               </div>
 
               <div className="bg-black/30 border border-white/10 rounded-2xl p-4 text-center">
                 <h3 className="text-2xl font-bold text-orange-400">
                   Fast
                 </h3>
-                <p className="text-xs text-gray-300">
-                  Contact
-                </p>
+                <p className="text-xs text-gray-300">Contact</p>
               </div>
             </div>
           </div>
@@ -180,6 +197,9 @@ function Builders() {
                     <img
                       src={builder.image}
                       alt={builder.name}
+                      onError={(e) => {
+                        e.currentTarget.src = fallbackImage;
+                      }}
                       className="h-72 w-full object-cover"
                     />
 
@@ -206,7 +226,7 @@ function Builders() {
                       </h2>
 
                       <p className="text-gray-300">
-                        {builder.projects}+ Projects
+                        {builder.projects || 0}+ Projects
                       </p>
                     </div>
                   </div>
@@ -229,7 +249,9 @@ function Builders() {
 
                       <p>
                         ⏳ Experience:{" "}
-                        <b className="text-white">{builder.experience} Years</b>
+                        <b className="text-white">
+                          {builder.experience} Years
+                        </b>
                       </p>
 
                       <p>
@@ -239,9 +261,16 @@ function Builders() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 mt-7">
-                      <button className="bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition">
+                      <a
+                        href={
+                          builder.phone && builder.phone !== "Not Available"
+                            ? `tel:${builder.phone}`
+                            : "#"
+                        }
+                        className="bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition text-center"
+                      >
                         Contact
-                      </button>
+                      </a>
 
                       <button className="border border-white/40 text-white py-3 rounded-xl font-bold hover:bg-white hover:text-black transition">
                         View Profile
@@ -254,9 +283,7 @@ function Builders() {
 
             {filteredBuilders.length === 0 && (
               <div className="text-center bg-white/10 border border-white/20 p-10 rounded-3xl mt-8">
-                <h2 className="text-2xl font-bold">
-                  No builders found
-                </h2>
+                <h2 className="text-2xl font-bold">No builders found</h2>
 
                 <p className="text-gray-300 mt-2">
                   Add builders in Supabase or try another search.
