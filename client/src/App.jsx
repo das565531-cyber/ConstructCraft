@@ -23,6 +23,8 @@ import AdminLogin from "./pages/AdminLogin";
 import OrderSuccess from "./pages/OrderSuccess";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
+import Orders from "./pages/Orders";
+import AdminOrders from "./pages/AdminOrders";
 
 function App() {
   return (
@@ -37,15 +39,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/admin-login" element={<AdminLogin />} />
-
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/order-success" element={<OrderSuccess />} />
+        <Route path="/profile"element={<ProtectedRoute> <Profile /> </ProtectedRoute>}/>
 
         <Route
           path="/dashboard"
@@ -81,8 +76,10 @@ function App() {
         <Route path="/reviews" element={<Reviews />} />
         <Route path="/invoice" element={<Invoice />} />
         <Route path="/feedback" element={<Feedback />} />
-        <Route path="/order-success" element={<OrderSuccess />} />
         <Route path="*" element={<NotFound />} />
+        <Route path="/dashboard/orders" element={<Orders />} />
+        <Route path="/dashboard/admin-orders" element={<AdminOrders />} />
+
       </Routes>
     </BrowserRouter>
   );

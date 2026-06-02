@@ -1,6 +1,6 @@
 import supabase from "./supabase";
 
-export const createOrder = async (total, items) => {
+export const createOrder = async (orderData) => {
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -14,10 +14,13 @@ export const createOrder = async (total, items) => {
     .insert([
       {
         user_id: user.id,
-        customer_email: user.email,
-        total,
-        items,
-        status: "Placed",
+        user_email: user.email,
+        total_amount: orderData.total,
+        items: orderData.items,
+        delivery: orderData.delivery,
+        payment_method: orderData.payment_method,
+        payment_status: orderData.payment_status,
+        status: orderData.status || "Placed",
       },
     ])
     .select();
@@ -39,6 +42,18 @@ export const getUserOrders = async () => {
     .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return data || [];
+};
+
+export const updateOrderStatus = async (orderId, status) => {
+  const { data, error } = await supabase
+    .from("orders")
+    .update({ status })
+    .eq("id", orderId)
+    .select();
 
   if (error) throw error;
 
